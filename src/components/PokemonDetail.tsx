@@ -32,9 +32,9 @@ export function PokemonDetail() {
   const typeColor = TYPE_COLORS[mainType as keyof typeof TYPE_COLORS] || "#74CB48";
 
   return (
-    <div className="bg-pokedex-red p-1 min-h-screen">
+    <div className="bg-pokedex-red p-2">
       <Header title={"Pokédex"} />
-      <div className=" bg-pokedex-green rounded-xl p-4 h-[calc(100dvh-55px)] relative ">
+      <div className=" bg-pokedex-green rounded-xl p-4 min-h-screen relative ">
         <PokemonDetailHeader name={pokemon.name} id={pokemon.id} pokemon={pokemon} />
 
 
