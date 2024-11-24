@@ -1,14 +1,4 @@
-interface Stat {
-  base_stat: number;
-  stat: {
-    name: string;
-  };
-}
-
-interface PokemonStatsProps {
-  stats: Stat[];
-  color: string;
-}
+import { PokemonStatsProps } from "../types/pokemon";
 
 export function PokemonStats({ stats, color }: PokemonStatsProps) {
   return (

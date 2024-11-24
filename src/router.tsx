@@ -1,4 +1,4 @@
-import { Router, Route, RootRoute } from '@tanstack/react-router';
+import { Router, createRoute, RootRoute } from '@tanstack/react-router';
 import App from './App';
 import { PokemonDetail } from './components/PokemonDetail';
 import { PokemonList } from './components/PokemonList';
@@ -7,13 +7,13 @@ const rootRoute = new RootRoute({
   component: App,
 });
 
-const indexRoute = new Route({
+const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: PokemonList,
 });
 
-const pokemonRoute = new Route({
+const pokemonRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/pokemon/$pokemonName',
   component: PokemonDetail,

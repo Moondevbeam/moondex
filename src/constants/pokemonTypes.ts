@@ -1,4 +1,6 @@
-export const TYPE_COLORS = {
+import { TypeColors } from '../types/pokemon';
+
+export const TYPE_COLORS: TypeColors = {
     normal: '#A8A878',
     fire: '#F08030',
     water: '#6890F0',

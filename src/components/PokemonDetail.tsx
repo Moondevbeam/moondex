@@ -1,98 +1,81 @@
-import { useParams} from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useParams } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { getPokemonDetails, getPokemonSpecies } from "../api/pokeapi.services";
+import { usePokemonStore } from '../store/pokemonStore';
 import { Header } from "./Header";
 import { PokemonType } from "./PokemonType";
 import { PokemonStats } from "./PokemonStats";
 import { TYPE_COLORS } from "../constants/pokemonTypes";
 import { PokemonAbout } from "./PokemonAbout";
 import { PokemonDetailHeader } from "./PokemonDetailHeader";
-
-interface PokemonDetails {
-  name: string;
-  id: number;
-  sprites: {
-    other: {
-      "official-artwork": {
-        front_default: string;
-      };
-    };
-  };
-  types: Array<{
-    type: {
-      name: string;
-    };
-  }>;
-  weight: number;
-  height: number;
-  abilities: Array<{
-    ability: {
-      name: string;
-    };
-  }>;
-  stats: Array<{
-    base_stat: number;
-    stat: {
-      name: string;
-    };
-  }>;
-}
-
-interface PokemonSpecies {
-  flavor_text_entries: Array<{
-    flavor_text: string;
-    language: {
-      name: string;
-    };
-  }>;
-}
+import { LoadingSpinner } from "./LoadingSpinner";
 
 export function PokemonDetail() {
   const { pokemonName } = useParams({ from: "/pokemon/$pokemonName" });
+  const { 
+    selectedPokemon,
+    pokemonSpecies,
+    isLoading,
+    error,
+    setSelectedPokemon,
+    setPokemonSpecies,
+    setIsLoading,
+    setError 
+  } = usePokemonStore();
 
-  const { data: pokemon, isLoading: isLoadingPokemon } =
-    useQuery<PokemonDetails>({
-      queryKey: ["pokemon", pokemonName],
-      queryFn: () => getPokemonDetails(pokemonName),
-    });
+  useEffect(() => {
+    const fetchPokemonData = async () => {
+      setIsLoading(true);
+      try {
+        const pokemon = await getPokemonDetails(pokemonName);
+        setSelectedPokemon(pokemon);
+        const species = await getPokemonSpecies(pokemon.id);
+        setPokemonSpecies(species);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Si è verificato un errore');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const { data: species, isLoading: isLoadingSpecies } =
-    useQuery<PokemonSpecies>({
-      queryKey: ["pokemon-species", pokemon?.id],
-      queryFn: () => getPokemonSpecies(pokemon?.id || ""),
-      enabled: !!pokemon,
-    });
+    fetchPokemonData();
+    
+    return () => {
+      setSelectedPokemon(null);
+      setPokemonSpecies(null);
+      setError(null);
+    };
+  }, [pokemonName]);
 
-  if (isLoadingPokemon || isLoadingSpecies || !pokemon || !species)
-    return <div>Caricamento...</div>;
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <div>Errore: {error}</div>;
+  if (!selectedPokemon || !pokemonSpecies) return null;
 
-  const description =
-    species.flavor_text_entries
-      .find((entry) => entry.language.name === "en")
-      ?.flavor_text.replace(/\f/g, " ") || "";
+  const description = pokemonSpecies.flavor_text_entries
+    .find((entry) => entry.language.name === "en")
+    ?.flavor_text.replace(/\f/g, " ") || "";
 
-  const mainType = pokemon.types[0].type.name;
-  const typeColor =
-    TYPE_COLORS[mainType as keyof typeof TYPE_COLORS] || "#74CB48";
+  const mainType = selectedPokemon.types[0].type.name;
+  const typeColor = TYPE_COLORS[mainType as keyof typeof TYPE_COLORS] || "#74CB48";
 
   return (
-    <div className="bg-[#DC0A2D] p-1">
+    <div className="bg-pokedex-red p-1 min-h-screen">
       <Header title={"Pokédex"} />
+      <div className=" bg-pokedex-green rounded-xl p-4 h-[calc(100vh-55px)] relative ">
+        <PokemonDetailHeader name={selectedPokemon.name} id={selectedPokemon.id} pokemon={selectedPokemon} />
 
-      <div className="bg-[#74CB48] rounded-xl p-4 relative ">
-        <PokemonDetailHeader name={pokemon.name} id={pokemon.id} />
 
         <div className="relative">
           <img
-            src={pokemon.sprites.other["official-artwork"].front_default}
-            alt={pokemon.name}
+            src={selectedPokemon.sprites.other["official-artwork"].front_default}
+            alt={selectedPokemon.name}
             className="w-56 h-56 absolute left-1/2 -translate-x-1/2 -top-16 z-10 mt-2"
           />
         </div>
 
         <div className="bg-white rounded-3xl p-8 mt-32">
           <div className="flex justify-center gap-4 mb-2 mt-12">
-            {pokemon.types.map(({ type }) => (
+            {selectedPokemon.types.map(({ type }) => (
               <PokemonType key={type.name} type={type.name} />
             ))}
           </div>
@@ -105,16 +88,16 @@ export function PokemonDetail() {
           </h2>
 
           <PokemonAbout
-            weight={pokemon.weight}
-            height={pokemon.height}
-            abilities={pokemon.abilities}
+            weight={selectedPokemon.weight}
+            height={selectedPokemon.height}
+            abilities={selectedPokemon.abilities}
           />
 
           <p className="text-left font-medium w-full mb-2 pt-4 text-sm h-20">
             {description}
           </p>
 
-          <PokemonStats stats={pokemon.stats} color={typeColor} />
+          <PokemonStats stats={selectedPokemon.stats} color={typeColor} />
         </div>
       </div>
     </div>
