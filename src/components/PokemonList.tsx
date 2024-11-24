@@ -6,6 +6,7 @@ import { PokemonCard } from "./PokemonCard";
 import { usePokemonStore } from '../store/pokemonStore';
 import { PokemonCardSkeleton } from './PokemonCardSkeleton';
 import { usePokemonListQuery } from '../hooks/usePokemonQuery';
+import { PokemonTable } from './PokemonTable';
 
 export function PokemonList() {
   const navigate = useNavigate();
@@ -52,18 +53,32 @@ export function PokemonList() {
           ) : error ? (
             <p className="text-center text-pokedex-red">Errore nel caricamento dei Pokemon: {error.message}</p>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 p-4">
-              {filteredPokemon.map((poke) => (
-                <PokemonCard 
-                  key={poke.id} 
-                  pokemon={poke} 
-                  onClick={() => navigate({
+            <>
+              {/* Vista mobile e tablet (nascosta su desktop) */}
+              <div className="lg:hidden grid grid-cols-2 md:grid-cols-3 gap-4 p-4">
+                {filteredPokemon.map((poke) => (
+                  <PokemonCard 
+                    key={poke.id} 
+                    pokemon={poke} 
+                    onClick={() => navigate({
+                      to: '/pokemon/$pokemonName',
+                      params: { pokemonName: poke.name }
+                    })}
+                  />
+                ))}
+              </div>
+
+              {/* Vista desktop (nascosta su mobile e tablet) */}
+              <div className="hidden lg:block h-full">
+                <PokemonTable 
+                  pokemon={filteredPokemon} 
+                  onPokemonClick={(name) => navigate({
                     to: '/pokemon/$pokemonName',
-                    params: { pokemonName: poke.name }
+                    params: { pokemonName: name }
                   })}
                 />
-              ))}
-            </div>
+              </div>
+            </>
           )}
         </div>
       </div>
