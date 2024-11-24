@@ -34,7 +34,7 @@ export function PokemonDetail() {
   return (
     <div className="bg-pokedex-red p-1 min-h-screen">
       <Header title={"Pokédex"} />
-      <div className=" bg-pokedex-green rounded-xl p-4 h-[calc(100vh-55px)] relative ">
+      <div className=" bg-pokedex-green rounded-xl p-4 h-[calc(100dvh-55px)] relative ">
         <PokemonDetailHeader name={pokemon.name} id={pokemon.id} pokemon={pokemon} />
 
 
