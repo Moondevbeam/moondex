@@ -78,3 +78,26 @@ export interface PokemonStatsProps {
   stats: Stat[];
   color: string;
 }
+
+export type PokemonResponse = {
+  results: Array<{
+    name: string
+    url: string
+  }>
+}
+
+export type SafePokemon = Omit<Pokemon, 'sprites'> & {
+  sprites: {
+    other: {
+      'official-artwork': {
+        front_default: string
+      }
+    }
+  }
+}
+
+export interface PokemonTypeData {
+  type: {
+    name: string;
+  };
+}
